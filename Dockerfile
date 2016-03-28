@@ -5,17 +5,19 @@ MAINTAINER Brandon Gulla
 ENV MAVEN_URL http://apache.mirrors.hoobly.com/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz
 ENV ALEXA_HOME /opt/alexa
 
-# Configure nodejs source
-RUN curl -sL https://deb.nodesource.com/setup | sudo bash -
-
-# Install Packages
+# Install overhead reqs
 RUN apt-get update && apt-get install -y -q \
     libasound2-dev \
     memcached \
     mpg123 \
-    python-alsaaudio \
-    python-pip curl \
-    nodejs git python-setuptools opensssl vlc-nox vlc-data \
+    python-alsaaudio curl
+
+# Configure nodejs source
+RUN curl -sL https://deb.nodesource.com/setup | sudo bash -
+
+# Install Packages
+RUN apt-get install -y -q \
+    nodejs git python-setuptools openssl vlc-nox vlc-data \
     --no-install-recommends
 
 #    rm -rf /var/lib/apt/lists/*
@@ -44,12 +46,14 @@ RUN sed -i -e 's/YOUR_ORGANIZATIONAL_UNIT/bar/g' ${ALEXA_HOME}/samples/javaclien
 RUN ${ALEXA_HOME}/samples/javaclient/generate.sh
 
 # modify Config.js
-RUN sed -i -e 's/sslKey: \x27/sslKey: \x27${ALEXA_HOME}/samples/javaclient/certs/server/node.key/g'
-RUN sed -i -e 's/sslCert: \x27/sslCert: \x27${ALEXA_HOME}/samples/javaclient/certs/server/node.crt\/g'
-RUN sed -i -e 's/sslCaCert: \x27/sslCaCert: \x27${ALEXA_HOME}/samples/javaclient/certs/ca/ca.crt\/g'
+RUN sed -i -e 's/sslKey: \x27/sslKey: \x27${ALEXA_HOME}/g' ${ALEXA_HOME}/samples/companionService/config.js && cat ${ALEXA_HOME}/samples/companionService/config.js
+#RUN sed -i -e "s/sslKey: \x27/sslKey: \x27${ALEXA_HOME}\/samples\/javaclient\/certs\/server\/node.key\/g" ${ALEXA_HOME}/samples/companionService/config.js
+
+RUN sed -i -e 's/sslCert: \x27/sslCert: \x27${ALEXA_HOME}/samples/javaclient/certs/server/node.crt/g' ${ALEXA_HOME}/samples/companionService/config.js
+RUN sed -i -e 's/sslCaCert: \x27/sslCaCert: \x27${ALEXA_HOME}/samples/javaclient/certs/ca/ca.crt/g' ${ALEXA_HOME}/samples/companionService/config.js
 # modify Config.json
-RUN sed -i -e 's/"sslClientKeyStore":""/"sslClientKeyStore":"${ALEXA_HOME}/samples/javaclient/certs/client/client.pkcs12"/g' ${ALEXA_HOME}/samples/javaclient/config.json 
-RUN sed -i -e 's/"sslKeyStore":""/"sslKeyStore":"${ALEXA_HOME}/samples/javaclient/certs/server/jetty.pkcs12"/g' ${ALEXA_HOME}/samples/javaclient/config.json 
+RUN sed -i -e 's/"sslClientKeyStore":""/"sslClientKeyStore":"${ALEXA_HOME}/samples/javaclient/certs/client/client.pkcs12"/g' ${ALEXA_HOME}/samples/javaclient/config.json
+RUN sed -i -e 's/"sslKeyStore":""/"sslKeyStore":"${ALEXA_HOME}/samples/javaclient/certs/server/jetty.pkcs12"/g' ${ALEXA_HOME}/samples/javaclient/config.json
 
 # Setup the supervisord
 RUN pip install supervisor
