@@ -5,3 +5,5 @@ pialexa:
   environment:
     - "clientId=TODO"
     - "clientSecret=TODO"
+  devices:
+    - "/dev/snd:/dev/snd"
