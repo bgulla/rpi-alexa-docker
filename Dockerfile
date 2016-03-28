@@ -4,6 +4,7 @@ MAINTAINER Brandon Gulla
 # Environment Vars used for building docker
 ENV MAVEN_URL http://apache.mirrors.hoobly.com/maven/maven-3/3.3.9/binaries/apache-maven-3.3.9-bin.tar.gz
 ENV ALEXA_HOME /opt/alexa
+ENV ALEXA_HOME_ESCAPED "\/opt\/alexa"
 
 # Install overhead reqs
 RUN apt-get update && apt-get install -y -q \
@@ -17,7 +18,7 @@ RUN curl -sL https://deb.nodesource.com/setup | sudo bash -
 
 # Install Packages
 RUN apt-get install -y -q \
-    nodejs git python-setuptools openssl vlc-nox vlc-data \
+    nodejs git npm openssl vlc-nox vlc-data supervisor \
     --no-install-recommends
 
 #    rm -rf /var/lib/apt/lists/*
@@ -46,21 +47,19 @@ RUN sed -i -e 's/YOUR_ORGANIZATIONAL_UNIT/bar/g' ${ALEXA_HOME}/samples/javaclien
 RUN ${ALEXA_HOME}/samples/javaclient/generate.sh
 
 # modify Config.js
-RUN sed -i -e 's/sslKey: \x27/sslKey: \x27${ALEXA_HOME}/g' ${ALEXA_HOME}/samples/companionService/config.js && cat ${ALEXA_HOME}/samples/companionService/config.js
-#RUN sed -i -e "s/sslKey: \x27/sslKey: \x27${ALEXA_HOME}\/samples\/javaclient\/certs\/server\/node.key\/g" ${ALEXA_HOME}/samples/companionService/config.js
-
-RUN sed -i -e 's/sslCert: \x27/sslCert: \x27${ALEXA_HOME}/samples/javaclient/certs/server/node.crt/g' ${ALEXA_HOME}/samples/companionService/config.js
-RUN sed -i -e 's/sslCaCert: \x27/sslCaCert: \x27${ALEXA_HOME}/samples/javaclient/certs/ca/ca.crt/g' ${ALEXA_HOME}/samples/companionService/config.js
+RUN sed -i -e "s/sslKey: \x27/sslKey: \x27${ALEXA_HOME_ESCAPED}\/samples\/javaclient\/certs\/server\/node.key/g" ${ALEXA_HOME}/samples/companionService/config.js && cat ${ALEXA_HOME}/samples/companionService/config.js
+RUN sed -i -e "s/sslCert: \x27/sslCert: \x27${ALEXA_HOME_ESCAPED}\/samples\/javaclient\/certs\/server\/node.crt/g" ${ALEXA_HOME}/samples/companionService/config.js&& cat ${ALEXA_HOME}/samples/companionService/config.js
+RUN sed -i -e "s/sslCaCert: \x27/sslCaCert: \x27${ALEXA_HOME_ESCAPED}\/samples\/javaclient\/certs\/ca\/ca.crt/g" ${ALEXA_HOME}/samples/companionService/config.js && cat ${ALEXA_HOME}/samples/companionService/config.js
 # modify Config.json
-RUN sed -i -e 's/"sslClientKeyStore":""/"sslClientKeyStore":"${ALEXA_HOME}/samples/javaclient/certs/client/client.pkcs12"/g' ${ALEXA_HOME}/samples/javaclient/config.json
-RUN sed -i -e 's/"sslKeyStore":""/"sslKeyStore":"${ALEXA_HOME}/samples/javaclient/certs/server/jetty.pkcs12"/g' ${ALEXA_HOME}/samples/javaclient/config.json
+RUN sed -i -e 's/"sslClientKeyStore":""/"sslClientKeyStore":"${ALEXA_HOME_ESCAPED}\/samples\/javaclient\/certs\/client\/client.pkcs12"/g' ${ALEXA_HOME}/samples/javaclient/config.json && cat ${ALEXA_HOME}/samples/javaclient/config.json
+RUN sed -i -e 's/"sslKeyStore":""/"sslKeyStore":"${ALEXA_HOME_ESCAPED}\/samples\/javaclient\/certs\/server\/jetty.pkcs12"/g' ${ALEXA_HOME}/samples/javaclient/config.json
 
 # Setup the supervisord
-RUN pip install supervisor
 COPY ./conf/supervisor.cnf /etc/supervisor.cnf
 
 # compile the nodejs client
-WORKDIR ["{ALEXA_HOME}/samples/companionService"]
+RUN cd /opt/alexa/samples/companionService
+#RUN apt-get install -y npm
 RUN npm install 
 
 RUN echo " STILL NOT DONE NOR FUNCTIONAL"
