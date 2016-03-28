@@ -1,0 +1,7 @@
+pialexa:
+  build: .
+  ports:
+    - "3000:3000/tcp"
+  environment:
+    - "clientId=TODO"
+    - "clientSecret=TODO"
