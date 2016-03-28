@@ -33,9 +33,9 @@ RUN apt-get install -y openssl && /opt/alexa/samples/javaclient/generate.sh
 
 # Config.js
 
-RUN sed -i -e "s/sslKey: ''/sslKey: '/opt/alexa/samples/javaclient/certs/server/node.key'/g"
-RUN sed -i -e 's/sslCert: \'\'/sslCert: \'/opt/alexa/samples/javaclient/certs/server/node.crt\'/g'
-RUN sed -i -e 's/sslCaCert: \'\'/sslCaCert: \'/opt/alexa/samples/javaclient/certs/ca/ca.crt\'/g'
+RUN sed -i -e 's/sslKey: \x27/sslKey: \x27/opt/alexa/samples/javaclient/certs/server/node.key/g'
+RUN sed -i -e 's/sslCert: \x27/sslCert: \x27/opt/alexa/samples/javaclient/certs/server/node.crt\/g'
+RUN sed -i -e 's/sslCaCert: \x27/sslCaCert: \x27/opt/alexa/samples/javaclient/certs/ca/ca.crt\/g'
 
 # Config.json
 RUN sed -i -e 's/"sslClientKeyStore":""/"sslClientKeyStore":"/opt/alexa/samples/javaclient/certs/client/client.pkcs12"/g' /opt/alexa/samples/javaclient/config.json 
