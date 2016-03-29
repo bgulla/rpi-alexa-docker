@@ -1,0 +1,6 @@
+[supervisord]
+nodaemon=true
+
+[programm:nodeserver]
+directory=/opt/alexa/samples/companionService
+command=npm start

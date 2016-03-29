@@ -1,4 +1,4 @@
-FROM hypriot/rpi-java
+FROM hypriot/rpi-node
 MAINTAINER Brandon Gulla
 
 # Environment Vars used for building docker
@@ -11,14 +11,14 @@ RUN apt-get update && apt-get install -y -q \
     libasound2-dev \
     memcached \
     mpg123 \
-    python-alsaaudio curl
+    python-alsaaudio curl openjdk-8-jdk
 
 # Configure nodejs source
-RUN curl -sL https://deb.nodesource.com/setup | sudo bash -
+#RUN curl --insecure -sLS https://apt.adafruit.com/add | sudo bash # TODO: make more secure
 
 # Install Packages
 RUN apt-get install -y -q \
-    nodejs git npm openssl vlc-nox vlc-data supervisor \
+     git openssl vlc-nox vlc-data supervisor \
     --no-install-recommends
 
 #    rm -rf /var/lib/apt/lists/*
@@ -57,9 +57,15 @@ RUN sed -i -e 's/"sslKeyStore":""/"sslKeyStore":"${ALEXA_HOME_ESCAPED}\/samples\
 # Setup the supervisord
 COPY ./conf/supervisor.cnf /etc/supervisor.cnf
 
+#RUN curl -sL https://deb.nodesource.com/setup | sudo bash -
+#RUN apt-get install -y nodejs
 # compile the nodejs client
-RUN cd /opt/alexa/samples/companionService
+WORKDIR /opt/alexa/samples/companionService
 #RUN apt-get install -y npm
+#
+#RUN npm install debug
+#RUN npm install body-parser
 RUN npm install 
 
-RUN echo " STILL NOT DONE NOR FUNCTIONAL"
+
+CMD ["supervisord","-c","/etc/supervisor.cnf"]
